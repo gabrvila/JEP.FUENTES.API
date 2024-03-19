@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Entities.Models;
 using Shared.DataTransferObjects;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace JEP.FUENTES.API
 {
@@ -10,11 +9,10 @@ namespace JEP.FUENTES.API
         public MappingProfile()
         {
             CreateMap<Entidad, EntidadDto>();
-                //.ForCtorParam("DireccionCompleta",
-                //           opt => opt.MapFrom(x => string.Join(' ', x.Direccion, x.Pais)));
             CreateMap<EntidadForCreationDto, Entidad>();
             CreateMap<EntidadForUpdateDto, Entidad>();
-            CreateMap<UsuarioForRegistrationDto, Usuario>();
+            CreateMap<UsuarioForCreationDto, Usuario>()
+                .ForSourceMember(x => x.Contrasenna, y => y.DoNotValidate());
             CreateMap<Usuario, UsuarioDto>()
                 .ForMember(nameof(UsuarioDto.NombreCompleto),
                               opt => opt.MapFrom(x => string.Join(' ', x.PrimerNombre, x.SegundoNombre, 

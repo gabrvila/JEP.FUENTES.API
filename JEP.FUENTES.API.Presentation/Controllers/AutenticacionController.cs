@@ -12,17 +12,14 @@ public class AuthenticationController : ControllerBase
 
     [HttpPost("login")]
     //[ServiceFilter(typeof(ValidationFilterAttribute))] 
-    //public async Task<IActionResult> Authenticate([FromBody] UsuarioForAuthenticationDto usuario)
-    public IActionResult Authenticate([FromBody] UsuarioForAuthenticationDto usuario)
+    public async Task<IActionResult> Authenticate([FromBody] UsuarioForAuthenticationDto usuario)
     {
-        //if (!await _service.AuthenticationService.ValidarUsuario(usuario))
-        if (!_service.AuthenticationService.ValidarUsuario(usuario)) 
-            return Unauthorized();
+        if (!await _service.AuthenticationService.ValidarUsuario(usuario, trackChanges: false)) 
+            return BadRequest("Usuario o contraseña invalidos");
 
-        var usuarioToReturn = _service.AuthenticationService.GetUsuarioByName(usuario.UsuarioAcceso!);
+        var usuarioToReturn = await _service.AuthenticationService.GetUsuarioByName(usuario.UsuarioAcceso!, trackChanges: false);
         usuarioToReturn.Token = _service.AuthenticationService.CrearToken();
-
-        //return Ok(new { Token = await _service.AuthenticationService.CrearToken() }); 
+ 
         return Ok(usuarioToReturn);
     }
 }

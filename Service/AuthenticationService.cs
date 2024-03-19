@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Service.Contracts;
 using Shared.DataTransferObjects;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 
@@ -17,7 +17,6 @@ namespace Service
     {
   
         private readonly IConfiguration _configuration;
-        //private Usuario? _usuario;
 
         public AuthenticationService(IRepositoryManager repository, 
             ILoggerManager logger, 
@@ -27,20 +26,12 @@ namespace Service
             _configuration = configuration;
         }
 
-        public bool ValidarUsuario(UsuarioForAuthenticationDto usuarioForAuth)
-        //public Task<bool> ValidarUsuario(UsuarioForAuthenticationDto usuarioForAuth) 
+        public async Task<bool> ValidarUsuario(UsuarioForAuthenticationDto usuarioForAuth, bool trackChanges) 
         {
-            Boolean result = false;
+            var usuario = await _repository.Usuario.GetUsuarioByUsuarioAccesoAsync(usuarioForAuth.UsuarioAcceso!, trackChanges);
 
-            //_usuario = await _repository.FindByNameAsync(userForAuth.UserName); 
-            var usuario = GetUsuarioByName(usuarioForAuth.UsuarioAcceso!);
-
-            //var result = (_usuario != null && await _repository.CheckPasswordAsync(_usuario, usuarioForAuth.Contrasenna)); 
-            result = (usuario != null);
-
-            //if (!result) 
-            //_logger.LogWarn($"{nameof(ValidarUsuario)}: Autenticación fallida. Usuario o contrasenna incorrecta."); 
-
+            bool result = usuario != null && VerificarContrasenna(usuario, usuarioForAuth.Contrasenna!);
+           
             return result; 
         }
 
@@ -59,22 +50,6 @@ namespace Service
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256); 
         }
 
-        //private async Task<List<Claim>> GetClaims() 
-        //{ 
-        //    var claims = new List<Claim> 
-        //    { 
-        //        new Claim(ClaimTypes.Name, _user.UserName) 
-        //    }; 
-            
-        //    var roles = await _userManager.GetRolesAsync(_user); 
-        //    foreach (var role in roles) 
-        //    { 
-        //        claims.Add(new Claim(ClaimTypes.Role, role)); 
-        //    } 
-
-        //    return claims; 
-        //}
-
         private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials/*, List<Claim> claims*/) 
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -91,18 +66,9 @@ namespace Service
             return tokenOptions; 
         }
 
-        public UsuarioDto GetUsuarioByName(string usuarioAcceso)
+        public async Task<UsuarioDto> GetUsuarioByName(string usuarioAcceso, bool trackChanges)
         {
-            //usuario = await _repository.FindByNameAsync(userForAuth.UserName); 
-            Usuario usuario = new Usuario
-            {
-                Id = 1, 
-                PrimerNombre = "Gabriel", 
-                SegundoNombre = "Dario", 
-                PrimerApellido = "Villa", 
-                SegundoApellido = "Acevedo",
-                UsuarioAcceso = usuarioAcceso
-            };
+            var usuario = await _repository.Usuario.GetUsuarioByUsuarioAccesoAsync(usuarioAcceso!, trackChanges);
 
             if (usuario is null)
                 throw new UsuarioNotFoundException(usuarioAcceso!);
@@ -110,6 +76,20 @@ namespace Service
             var usuarioToReturn = _mapper.Map<UsuarioDto>(usuario);
 
             return usuarioToReturn;
+        }
+
+        private bool VerificarContrasenna(Usuario usuario, string contrasenna)
+        {
+            using var hmac = new HMACSHA512(usuario.ContrasennaSalt!);
+
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(contrasenna));
+
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != usuario.ContrasennaHash![i]) return false;
+            }
+
+            return true;
         }
     }
 }

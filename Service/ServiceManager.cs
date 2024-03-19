@@ -2,11 +2,6 @@
 using Contracts;
 using Microsoft.Extensions.Configuration;
 using Service.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service
 {
@@ -14,6 +9,7 @@ namespace Service
     {
         private readonly Lazy<IEntidadService> _entidadService;
         private readonly Lazy<IAuthenticationService> _authenticationService;
+        private readonly Lazy<IUsuarioService> _usuarioService;
 
         public ServiceManager(IRepositoryManager repositoryManager, 
             ILoggerManager logger, 
@@ -25,10 +21,15 @@ namespace Service
 
             _authenticationService = new Lazy<IAuthenticationService>(()
                 => new AuthenticationService(repositoryManager, logger, mapper, configuration));
+
+            _usuarioService = new Lazy<IUsuarioService>(()
+                => new UsuarioService(repositoryManager, logger, mapper));
+
         }
 
         public IEntidadService EntidadService => _entidadService.Value;
         public IAuthenticationService AuthenticationService => _authenticationService.Value;
+        public IUsuarioService UsuarioService => _usuarioService.Value;
 
     }
 }

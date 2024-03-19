@@ -5,12 +5,8 @@ namespace Service.Contracts
 {
     public interface IAuthenticationService 
     {
-        //Task<IdentityResult> RegisterUser(UsuarioForRegistrationDto usuarioForRegistration); 
-
-        //Task<bool> ValidarUsuario(UsuarioForAuthenticationDto usuarioForAuth);
-        public bool ValidarUsuario(UsuarioForAuthenticationDto usuarioForAuth);
-        public UsuarioDto GetUsuarioByName(string usuarioAcceso);
-        //Task<string> CrearToken();
+        public Task<bool> ValidarUsuario(UsuarioForAuthenticationDto usuarioForAuth, bool trackChanges);
+        public Task<UsuarioDto> GetUsuarioByName(string usuarioAcceso, bool trackChanges);
         string CrearToken();
     }
 }

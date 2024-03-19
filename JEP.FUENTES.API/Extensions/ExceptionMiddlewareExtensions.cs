@@ -27,7 +27,8 @@ namespace JEP.FUENTES.API.Extensions
                             _ => StatusCodes.Status500InternalServerError 
                         };
 
-                        logger.LogError($"Algo no está funcionando: {contextFeature.Error}");
+                        //logger.LogError($"Algo no está funcionando: {contextFeature.Error}");
+                        logger.LogError("Algo no está funcionando:", contextFeature.Error);
 
                         await context.Response.WriteAsync(new ErrorDetails()
                         {

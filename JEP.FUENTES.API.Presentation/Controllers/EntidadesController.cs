@@ -6,6 +6,7 @@ using Shared.DataTransferObjects;
 namespace JEP.FUENTES.API.Presentation.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/entidades")]
     public class EntidadesController : ControllerBase
     {
@@ -15,7 +16,6 @@ namespace JEP.FUENTES.API.Presentation.Controllers
             _service = service;
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetEntidades()
         {
             var entidades = await _service.EntidadService.GetAllEntidadesAsync(trackChanges: false);

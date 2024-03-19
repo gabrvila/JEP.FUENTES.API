@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using log4net.Config;
 
 namespace JEP.FUENTES.API.Extensions
 {
@@ -26,9 +27,11 @@ namespace JEP.FUENTES.API.Extensions
             {
             });
 
-        public static void ConfigureLoggerService(this IServiceCollection services) =>
+        public static void ConfigureLoggerService(this IServiceCollection services)
+        {
+            services.AddControllersWithViews();
             services.AddSingleton<ILoggerManager, LoggerManager>();
-
+        }
         public static void ConfigureRepositoryManager(this IServiceCollection services) =>
             services.AddScoped<IRepositoryManager, RepositoryManager>();
 
@@ -64,5 +67,6 @@ namespace JEP.FUENTES.API.Extensions
                 }; 
             }); 
         }
+
     }
 }

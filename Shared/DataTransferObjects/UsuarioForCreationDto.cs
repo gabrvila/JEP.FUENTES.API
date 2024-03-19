@@ -1,12 +1,11 @@
 ﻿namespace Shared.DataTransferObjects
 {
-    public record EntidadForUpdateDto(
+    public record UsuarioForCreationDto(
         string PrimerNombre,
         string SegundoNombre,
         string PrimerApellido,
         string SegundoApellido,
         string UsuarioAcceso,
-        byte[] ContrasennaHash,
-        byte[] ContrasennaSalt
-        );
+        string Contrasenna
+    );
 }
